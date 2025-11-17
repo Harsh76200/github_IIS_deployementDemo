@@ -1,0 +1,6 @@
+@github_IIS_deployementDemo.Server_HostAddress = http://localhost:5088
+
+GET {{github_IIS_deployementDemo.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
