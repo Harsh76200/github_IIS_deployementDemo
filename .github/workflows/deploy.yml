@@ -67,20 +67,19 @@ jobs:
         $destination = "C:\www\githubActionDemo.com"
 
         Write-Host "Stopping IIS website..."
-        Stop-Website -Name "githubActionDemo.com"
+        Stop-Website -Name "githubActionDemo.com" -ErrorAction SilentlyContinue
 
         Write-Host "Stopping App Pool..."
-        Stop-WebAppPool -Name "githubActionDemo.com"
+        Stop-WebAppPool -Name "githubActionDemo.com" -ErrorAction SilentlyContinue
 
-        Write-Host "Syncing files to IIS (fast delta copy)..."
-        robocopy $source $destination /MIR /NFL /NDL /NP /NJH /NJS | Out-Null
-        exit 0
+        Write-Host "Syncing files to IIS..."
+        robocopy $source $destination /MIR /NFL /NDL /NP /NJH /NJS
+        $exitCode = $LASTEXITCODE
+        if ($exitCode -gt 7) { exit 1 }
 
-        Write-Host "Starting App Pool..."
-        Start-WebAppPool -Name "githubActionDemo.com"
+        Write-Host "Restarting IIS completely for reliable refresh..."
+        iisreset /noforce
 
-        Write-Host "Starting Website..."
-        Start-Website -Name "githubActionDemo.com"
 
 
 
