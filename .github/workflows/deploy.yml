@@ -1,4 +1,4 @@
-name: .NET Core Deploy to IIS
+name: Fast Deploy to IIS (.NET 8)
 
 on:
   push:
@@ -10,41 +10,40 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+      # Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Faster, no full git history
+
+      # Setup .NET (cached)
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          cache: true    # Caches NuGet packages automatically
 
-      # Build the project
-      - name: Build with dotnet
-        shell: cmd
-        run: dotnet build --configuration Release
+      # Build + Publish (single command)
+      # MUCH FASTER than running build + publish separately
+      - name: Publish Project
+        run: dotnet publish "./github_IIS_deployementDemo.Server/github_IIS_deployementDemo.Server.csproj" -c Release -o ./publish
 
-      # Publish the project
-      - name: Publish with dotnet
-        shell: cmd
-        run: dotnet publish -c Release -o .\myapp
-
-      # Copy publish output to IIS folder
-      - name: Deploy to IIS
+      # Deploy only modified files (FAST)
+      - name: Deploy to IIS (delta copy)
         shell: powershell
         run: |
           Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-
           Import-Module WebAdministration
 
-          Write-Host "Stopping IIS website..."
-          Stop-Website -Name "githubActionDemo.com"
-
-          $source = "$(pwd)\myapp"
+          $source = "$(pwd)\publish"
           $destination = "C:\www\githubActionDemo.com"
 
-          Write-Host "Copying files to IIS folder..."
-          Copy-Item $source\* $destination\ -Recurse -Force
+          Write-Host "Stopping website..."
+          Stop-Website -Name "githubActionDemo.com"
 
-          Write-Host "Starting IIS website..."
+          Write-Host "Copying changed files ONLY..."
+          robocopy $source $destination /MIR /NFL /NDL /NP /NJH /NJS
+
+          Write-Host "Starting website..."
           Start-Website -Name "githubActionDemo.com"
-
