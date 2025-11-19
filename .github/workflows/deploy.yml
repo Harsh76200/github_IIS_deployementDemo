@@ -30,11 +30,8 @@ jobs:
       - name: Deploy to IIS
         shell: powershell
         run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
           $source = "$(pwd)\myapp"
           $destination = "C:\www\githubActionDemo.com"
-
-          Write-Host "Copying files to IIS folder..."
           Copy-Item $source\* $destination\ -Recurse -Force
-
-          Write-Host "Restarting IIS..."
           iisreset
