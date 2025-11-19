@@ -23,7 +23,12 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
 app.MapControllers();
+
 
 app.MapFallbackToFile("/index.html");
 
