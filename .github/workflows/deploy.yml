@@ -78,7 +78,6 @@ jobs:
         Write-Host "Starting App Pool..."
         Start-WebAppPool -Name "githubActionDemo.com"
 
-        Write-Host "Starting Website..."
-        Start-Website -Name "githubActionDemo.com"
+        
 
 
