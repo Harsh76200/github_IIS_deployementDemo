@@ -31,7 +31,18 @@ jobs:
         shell: powershell
         run: |
           Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+          Import-Module WebAdministration
+
+          Write-Host "Stopping IIS website..."
+          Stop-Website -Name "githubActionDemo.com"
+
           $source = "$(pwd)\myapp"
           $destination = "C:\www\githubActionDemo.com"
+
+          Write-Host "Copying files to IIS folder..."
           Copy-Item $source\* $destination\ -Recurse -Force
-          iisreset
+
+          Write-Host "Starting IIS website..."
+          Start-Website -Name "githubActionDemo.com"
+
