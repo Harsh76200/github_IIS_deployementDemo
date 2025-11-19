@@ -69,9 +69,16 @@ jobs:
         Write-Host "Stopping IIS website..."
         Stop-Website -Name "githubActionDemo.com"
 
-        Write-Host "Syncing files to IIS folder (fast delta copy)..."
+        Write-Host "Stopping App Pool..."
+        Stop-WebAppPool -Name "githubActionDemo.com"
+
+        Write-Host "Syncing files to IIS (delta copy)..."
         robocopy $source $destination /MIR /NFL /NDL /NP /NJH /NJS
 
-        Write-Host "Starting IIS website..."
+        Write-Host "Starting App Pool..."
+        Start-WebAppPool -Name "githubActionDemo.com"
+
+        Write-Host "Starting Website..."
         Start-Website -Name "githubActionDemo.com"
+
 
